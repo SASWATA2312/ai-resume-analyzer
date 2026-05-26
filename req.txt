@@ -1,0 +1,6 @@
+Flask
+SQLAlchemy
+PyMySQL
+requests
+PyPDF2
+python-docx
