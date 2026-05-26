@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Recommended Projects | LEVEL UP{% endblock %}
+
+{% block content %}
+<div class="feature-shell">
+    <section class="feature-hero" data-reveal>
+        <span class="eyebrow">Portfolio Builder</span>
+        <h1>Recommended projects to prove <span class="gradient-text">job readiness.</span></h1>
+        <p>Convert skill gaps into portfolio evidence with concise projects tied to your latest job comparison.</p>
+    </section>
+
+    {% if result %}
+    <section class="feature-context card" data-reveal>
+        <div><small>Personalized for</small><strong>{{ result.get("target_role", "Your target role") }}</strong></div>
+    </section>
+    <div class="project-grid">
+        {% for project in result.get("recommended_projects", []) %}
+        <article class="project-card card" data-reveal style="--reveal-delay: {{ loop.index0 * 75 }}ms;">
+            <div class="project-header">
+                <h2>{{ project.get("name") }}</h2>
+                <span class="project-level">{{ project.get("level") }}</span>
+            </div>
+            <div class="project-meta">
+                <span>{{ project.get("duration") }}</span>
+                <span>{{ project.get("focus", "Portfolio ready") }}</span>
+            </div>
+            <div class="project-content">
+                <p class="project-description">{{ project.get("description") }}</p>
+                <div class="required-skills">
+                    <strong>Required Skills</strong>
+                    <ul>
+                        {% for skill in project.get("required_skills", []) %}
+                        <li>{{ skill }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <button type="button" class="toggle-details-button" data-target="project-details-{{ loop.index }}">View implementation steps</button>
+            <div id="project-details-{{ loop.index }}" class="project-details" hidden>
+                <div class="project-steps">
+                    <strong>How to build this project</strong>
+                    <ol>
+                        {% for step in project.get("steps", []) %}
+                        <li>{{ step }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.toggle-details-button').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const target = document.getElementById(button.dataset.target);
+                if (!target) return;
+                target.hidden = !target.hidden;
+                button.textContent = target.hidden ? 'View implementation steps' : 'Hide steps';
+            });
+        });
+    });
+    </script>
+    {% else %}
+    <section class="empty-feature card" data-reveal>
+        <h2>Projects are now in your Career Roadmap</h2>
+        <p>Build a career roadmap for your target job to see personalized projects at each learning stage, with increasing complexity as you progress.</p>
+        <a class=\"download-button compact\" href=\"{{ url_for('roadmap') }}\">View Career Roadmap</a>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

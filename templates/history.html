@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="split-layout history-layout">
+    <div class="main-panel">
+
+    <div class="history-heading" data-reveal>
+        <span class="eyebrow">Saved intelligence</span>
+        <h2>Analysis History</h2>
+        <p>Return to your previous insights and downloadable resume drafts.</p>
+    </div>
+
+    {% for r in reports %}
+
+    {% if loop.first %}
+    <div class="history-list">
+    {% endif %}
+
+    <div class="card" data-reveal style="--reveal-delay: {{ loop.index0 * 45 }}ms;">
+        {% set result = r.result %}
+
+        {% if r.title %}
+        <p class="history-role">{{ r.title }}</p>
+        {% endif %}
+
+        {% if result.get("resume_score") is not none %}
+        <div class="history-score">
+            <strong>{{ result.get("resume_score") }}</strong><span>/100 Resume Score</span>
+        </div>
+        {% endif %}
+
+        <p><strong>Resume Preview:</strong></p>
+        <p>{{ r.resume[:150] }}</p>
+
+        <hr>
+
+        <h3>Skills</h3>
+
+        <ul>
+            {% for s in result.get("skills", []) %}
+                <li>{{ s }}</li>
+            {% endfor %}
+        </ul>
+
+        <hr>
+
+        <h3>Missing Skills</h3>
+
+        <ul>
+            {% for s in result.get("missing_skills", []) %}
+                <li>{{ s }}</li>
+            {% endfor %}
+        </ul>
+
+        <hr>
+
+        <h3>Roadmap</h3>
+
+        <ul>
+            {% for s in result.get("roadmap", []) %}
+                <li>{{ s }}</li>
+            {% endfor %}
+        </ul>
+
+        <hr>
+
+        <h3>Interview Questions List</h3>
+
+        <ul>
+            {% for s in result.get("interview_questions", []) %}
+                <li>{{ s }}</li>
+            {% endfor %}
+        </ul>
+
+        {% if result.get("career_options") %}
+        <hr>
+        <h3>Career Options</h3>
+        <ul>
+            {% for career in result.get("career_options", []) %}
+                <li>{{ career.get("title", career) if career is mapping else career }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <a class="download-button compact" href="{{ url_for('download_report', report_id=r.id) }}" download>Download resume PDF</a>
+    </div>
+
+    <br>
+
+    {% endfor %}
+
+    {% if reports|length > 0 %}
+    </div>
+    {% else %}
+    <div class="empty-state card" data-reveal>
+        <h3>No analyses yet</h3>
+        <p>Upload your resume on the dashboard to generate your first career intelligence report.</p>
+        <a class="download-button compact" href="{{ url_for('dashboard') }}">Start an analysis</a>
+    </div>
+    {% endif %}
+
+    </div>
+
+    <aside class="aside-panel" data-reveal style="--reveal-delay: 100ms;">
+        <h3>Recent Activity</h3>
+        <p>Quick summary of your last uploads and insights.</p>
+
+        <div class="tip-cards">
+            <div class="tip-card">Total reports: <small>{{ reports|length }}</small></div>
+            <div class="tip-card">Top skill: <small>{% if reports and reports[0].result.get("skills") %}{{ reports[0].result.get("skills")[0] }}{% else %}-{% endif %}</small></div>
+            <div class="tip-card">Latest report: <small>{% if reports %}Available{% else %}-{% endif %}</small></div>
+        </div>
+
+    </aside>
+
+</div>
+
+{% endblock %}

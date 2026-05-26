@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In | LEVEL UP{% endblock %}
+
+{% block content %}
+<div class="split-layout auth-layout">
+    <div class="main-panel">
+        <div class="auth-container" data-reveal>
+            <div class="auth-card">
+                <span class="eyebrow">LEVEL UP Platform</span>
+                <h2>Welcome back</h2>
+                <p class="sub-text">Sign in to continue your career intelligence workspace.</p>
+
+                {% if error %}
+                    <p class="error">{{ error }}</p>
+                {% endif %}
+
+                <form id="login-form" method="POST">
+                    <input
+                        type="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        autocomplete="email"
+                        required
+                    >
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+                    <button class="login-button" type="submit">
+                        <span class="login-label">Sign in securely</span>
+                        <span class="login-progress" aria-hidden="true">
+                            <i></i><i></i><i></i>
+                        </span>
+                    </button>
+                </form>
+
+                <div class="auth-links">
+                    <a href="{{ url_for('forgot_password') }}">Forgot password?</a>
+                </div>
+                <p class="switch-auth">
+                    Do not have an account?
+                    <a href="{{ url_for('signup') }}">Create account</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <aside class="aside-panel auth-aside" data-reveal style="--reveal-delay: 120ms;">
+        <span class="eyebrow">AI Advantage</span>
+        <h3>Analyze with clarity</h3>
+        <p>A premium workflow designed to sharpen your resume before the application.</p>
+        <div class="tip-cards">
+            <div class="tip-card">ATS scoring <small>See your alignment at a glance</small></div>
+            <div class="tip-card">Career roadmap <small>Focus on the skills that matter</small></div>
+            <div class="tip-card">PDF export <small>Take your improved draft with you</small></div>
+        </div>
+    </aside>
+</div>
+
+<script>
+document.getElementById("login-form").addEventListener("submit", function () {
+    this.classList.add("is-logging-in");
+    this.querySelector("button").disabled = true;
+});
+</script>
+{% endblock %}

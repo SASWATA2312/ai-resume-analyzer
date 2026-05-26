@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#060b1d">
+    <title>{% block title %}Level Up | Career Intelligence{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>document.documentElement.classList.add("js-enhanced");</script>
+</head>
+<body>
+    <div class="ambient-background" aria-hidden="true">
+        <span class="ambient-orb orb-cyan"></span>
+        <span class="ambient-orb orb-violet"></span>
+        <span class="ambient-orb orb-blue"></span>
+    </div>
+    {% if session.get("user") %}
+    <header class="navbar">
+        <div class="nav-container">
+            <a class="brand" href="{{ url_for('dashboard') }}" aria-label="Level Up dashboard">
+                <span class="brand-copy">
+                    <strong>LEVEL UP</strong>
+                    <small>Career Intelligence</small>
+                </span>
+            </a>
+            <nav class="nav-links" aria-label="Primary navigation">
+                <a class="{{ 'active' if request.endpoint == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a class="{{ 'active' if request.endpoint == 'coach' else '' }}" href="{{ url_for('coach') }}">Coach</a>
+                <a class="{{ 'active' if request.endpoint == 'projects' else '' }}" href="{{ url_for('projects') }}">Projects</a>
+                <a class="{{ 'active' if request.endpoint == 'roadmap' else '' }}" href="{{ url_for('roadmap') }}">Roadmap</a>
+                <a class="{{ 'active' if request.endpoint == 'history' else '' }}" href="{{ url_for('history') }}">History</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </nav>
+        </div>
+    </header>
+    {% endif %}
+    <main class="container page" id="page-root">
+    {% block content %} {% endblock %}
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const page = document.getElementById('page-root');
+    if(!page) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    requestAnimationFrame(() => page.classList.add('page-enter'));
+
+    const reveals = document.querySelectorAll('[data-reveal]');
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+        reveals.forEach((element) => element.classList.add('is-visible'));
+    } else {
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+        reveals.forEach((element) => observer.observe(element));
+    }
+
+    document.addEventListener('click', function(e){
+        const a = e.target.closest && e.target.closest('a');
+        if(!a) return;
+        const href = a.getAttribute('href');
+        if(!href || href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('#')) return;
+        if(a.hasAttribute('download')) return;
+        if(a.target && a.target !== '_self') return;
+
+        e.preventDefault();
+        page.classList.remove('page-enter');
+        page.classList.add('page-exit');
+        page.addEventListener('animationend', function onEnd(){
+            page.removeEventListener('animationend', onEnd);
+            window.location.href = href;
+        });
+    });
+});
+</script>
+
+<footer>
+    <p>&copy; 2026 Level Up. Intelligent career analysis.</p>
+</footer>
+
+</body>
+</html>
