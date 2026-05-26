@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Career Roadmap | LEVEL UP{% endblock %}
+
+{% block content %}
+<div class="feature-shell">
+    <section class="feature-hero" data-reveal>
+        <span class="eyebrow">Career Roadmap</span>
+        <h1>Your personal route from basics to <span class="gradient-text">job readiness.</span></h1>
+        <p>Enter only your desired job. LEVEL UP builds a clear field-specific learning path with skills, stages, and estimated days.</p>
+    </section>
+
+    <section class="roadmap-form card" data-reveal style="--reveal-delay: 60ms;">
+        <div>
+            <span class="eyebrow">Choose your destination</span>
+            <h2>What job do you want to prepare for?</h2>
+        </div>
+        <form method="POST" class="role-roadmap-form">
+            <label class="field-label" for="roadmap-role">Desired job</label>
+            <div class="role-entry">
+                <input id="roadmap-role" type="text" name="role" value="{{ target_role }}" placeholder="For example: Data Analyst, Frontend Developer, UX Designer" required>
+                <button type="submit">Generate Roadmap</button>
+            </div>
+        </form>
+    </section>
+
+    {% if result %}
+        {% if result.error %}
+        <p class="alert error">{{ result.error }}</p>
+        {% else %}
+        <section class="roadmap-summary card" data-reveal>
+            <div>
+                <small>Desired job</small>
+                <strong>{{ result.get("target_role", "Career destination") }}</strong>
+            </div>
+            <div>
+                <small>Total estimated journey</small>
+                <strong>{{ result.get("roadmap_days", 0) }} days</strong>
+            </div>
+            <div>
+                <small>Learning stages</small>
+                <strong class="cyan">{{ result.get("career_roadmap", [])|length }} phases</strong>
+            </div>
+        </section>
+
+        <section class="core-skills card" data-reveal>
+            <div>
+                <span class="eyebrow">Role essentials</span>
+                <h2>Skills to build</h2>
+            </div>
+            <div class="skill-tags">
+                {% for skill in result.get("core_skills", []) %}<span>{{ skill }}</span>{% endfor %}
+            </div>
+        </section>
+
+        <section class="timeline card" data-reveal>
+            {% for stage in result.get("career_roadmap", []) %}
+            <article class="timeline-stage" data-reveal style="--reveal-delay: {{ loop.index0 * 100 }}ms;">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="stage-head">
+                        <span>{{ stage.get("level") }}</span>
+                        <strong>{{ stage.get("days") }} days</strong>
+                    </div>
+                    <div class="skill-tags">
+                        {% for skill in stage.get("skills", []) %}<span>{{ skill }}</span>{% endfor %}
+                    </div>
+                    <p>{{ stage.get("outcome") }}</p>
+                    
+                    {% if stage.get("project") %}
+                    <div class="stage-project-section">
+                        <div class="stage-project-header">
+                            <h4>Project for this stage</h4>
+                        </div>
+                        <div class="stage-project">
+                            <h5>{{ stage.get("project").get("name") }}</h5>
+                            <p class="project-description">{{ stage.get("project").get("description") }}</p>
+                            <div class="project-details-inline">
+                                <div><strong>Duration:</strong> {{ stage.get("project").get("duration") }}</div>
+                                <div><strong>Focus:</strong> {{ stage.get("project").get("focus_skills") }}</div>
+                                <div><strong>Deliverable:</strong> {{ stage.get("project").get("deliverable") }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+
+        <div class="smart-links" data-reveal>
+            <a href="{{ url_for('coach') }}"><strong>Review Your Resume</strong><small>Check your updated resume for this target job</small></a>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

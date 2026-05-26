@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="auth-container" data-reveal>
+    <div class="auth-card">
+
+        <span class="eyebrow">LEVEL UP Platform</span>
+        <h2>Create account</h2>
+
+        <p class="sub-text">
+            Start your career growth journey.
+        </p>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST">
+
+            <input 
+                type="email" 
+                name="email" 
+                placeholder="Enter your email" 
+                required
+            >
+
+            <input 
+                type="password" 
+                name="password" 
+                placeholder="Create a password" 
+                required
+            >
+
+            <p class="sub-text">
+                Use atleast 6 characters
+            </p>
+
+            <button type="submit">
+                Sign up
+            </button>
+
+        </form>
+
+        <p class="switch-auth">
+            Already have an account?
+            <a href="/login">Login</a>
+        </p>
+
+    </div>
+</div>
+
+{% endblock %}

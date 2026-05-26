@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-shell">
+    <section class="dashboard-hero" data-reveal>
+        <div>
+            <span class="eyebrow">Resume Intelligence</span>
+            <h1>Build a resume ready for your <span class="gradient-text">next role.</span></h1>
+            <p class="hero-copy">Analyze ATS alignment, reveal skill gaps, discover career paths, and generate a polished resume report in seconds.</p>
+        </div>
+    </section>
+
+    <section class="module-launcher" data-reveal style="--reveal-delay: 50ms;">
+        <a class="module-card" href="{{ url_for('coach') }}">
+            <span>01</span>
+            <strong>Resume Coach</strong>
+            <small>Review your updated resume for a target job.</small>
+        </a>
+        <a class="module-card" href="{{ url_for('action_verbs') }}">
+            <span>02</span>
+            <strong>Smart Action Verbs</strong>
+            <small>Turn ordinary bullets into stronger statements.</small>
+        </a>
+        <a class="module-card" href="{{ url_for('projects') }}">
+            <span>03</span>
+            <strong>Recommended Projects</strong>
+            <small>Build evidence for the role you want.</small>
+        </a>
+        <a class="module-card" href="{{ url_for('roadmap') }}">
+            <span>04</span>
+            <strong>Career Roadmap</strong>
+            <small>Move from foundations to advanced readiness.</small>
+        </a>
+    </section>
+
+    <div class="workspace-grid">
+        <section class="composer card" data-reveal style="--reveal-delay: 80ms;">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">New analysis</span>
+                    <h2>Start a report</h2>
+                </div>
+                <span class="step-pill">01</span>
+            </div>
+
+            <form class="analyzer-form" id="analyzer-form" method="POST" enctype="multipart/form-data">
+                <label class="field-label" for="role">Target role</label>
+                <input
+                    id="role"
+                    type="text"
+                    name="role"
+                    value="{{ request.form.get('role', '') }}"
+                    placeholder="For example: Backend Developer"
+                    required
+                >
+
+                <label class="field-label" for="resume">Resume text</label>
+                <textarea
+                    id="resume"
+                    name="resume"
+                    placeholder="Paste experience, skills, projects, and education here..."
+                >{{ request.form.get('resume', '') }}</textarea>
+
+                <div class="upload-field">
+                    <div>
+                        <strong>Upload instead</strong>
+                        <small>PDF or DOCX supported</small>
+                    </div>
+                    <input id="file" type="file" name="file" accept=".pdf,.docx">
+                </div>
+
+                <button class="primary-button" type="submit"><span>Analyze Resume</span></button>
+            </form>
+        </section>
+
+        <aside class="guidance-card" data-reveal style="--reveal-delay: 140ms;">
+            <span class="eyebrow">How it works</span>
+            <h2>A clearer next step</h2>
+            <div class="guide-list">
+                <div class="guide-item">
+                    <span>1</span>
+                    <div><strong>Add your resume</strong><small>Paste text or upload your latest document.</small></div>
+                </div>
+                <div class="guide-item">
+                    <span>2</span>
+                    <div><strong>Name your goal</strong><small>Choose the exact role you are aiming for.</small></div>
+                </div>
+                <div class="guide-item">
+                    <span>3</span>
+                    <div><strong>Practice smarter</strong><small>Use gaps and questions to prepare.</small></div>
+                </div>
+            </div>
+            <a class="secondary-link" href="{{ url_for('history') }}">View previous reports</a>
+        </aside>
+    </div>
+
+    {% if result %}
+    <section class="analysis-results" data-reveal>
+        <div class="section-heading results-heading">
+            <div>
+                <span class="eyebrow">Your analysis</span>
+                <h2>Resume insights</h2>
+            </div>
+        </div>
+
+        {% if result.error %}
+            <p class="alert error">{{ result.error }}</p>
+        {% else %}
+        {% if result.get("analysis_notice") %}
+        <p class="alert notice">{{ result.get("analysis_notice") }}</p>
+        {% endif %}
+        <div class="score-feature" data-reveal style="--reveal-delay: 60ms;">
+            <div class="score-ring" style="--score: {{ result.get('resume_score', 0) }};">
+                <div class="score-center">
+                    <strong>{{ result.get("resume_score", 0) }}</strong>
+                    <small>/ 100</small>
+                </div>
+            </div>
+            <div class="score-copy">
+                <span class="eyebrow">Resume score</span>
+                <h3>Match strength for your goal</h3>
+                <p>{{ result.get("score_summary", "") }}</p>
+                {% if report_id %}
+                <a class="download-button" href="{{ url_for('download_report', report_id=report_id) }}" download>
+                    {{ "Download resume PDF" if result.get("analysis_notice") else "Download optimized resume PDF" }}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="result-grid">
+            <article class="result-card skills" data-reveal style="--reveal-delay: 90ms;">
+                <h3>Relevant Skills</h3>
+                <ul>
+                    {% for item in result.get("skills", []) %}
+                        <li>{{ item }}</li>
+                    {% else %}
+                        <li class="empty">No matching skills identified.</li>
+                    {% endfor %}
+                </ul>
+            </article>
+
+            <article class="result-card gaps" data-reveal style="--reveal-delay: 140ms;">
+                <h3>Skill Gaps</h3>
+                <ul>
+                    {% for item in result.get("missing_skills", []) %}
+                        <li>{{ item }}</li>
+                    {% else %}
+                        <li class="empty">No gaps listed.</li>
+                    {% endfor %}
+                </ul>
+            </article>
+
+            <article class="result-card roadmap" data-reveal style="--reveal-delay: 190ms;">
+                <h3>Learning Roadmap</h3>
+                <ol>
+                    {% for item in result.get("roadmap", []) %}
+                        <li>{{ item }}</li>
+                    {% else %}
+                        <li class="empty">No roadmap steps listed.</li>
+                    {% endfor %}
+                </ol>
+            </article>
+
+            <article class="result-card questions" data-reveal style="--reveal-delay: 240ms;">
+                <h3>Interview Questions</h3>
+                <ol>
+                    {% for item in result.get("interview_questions", []) %}
+                        <li>{{ item }}</li>
+                    {% else %}
+                        <li class="empty">No interview questions listed.</li>
+                    {% endfor %}
+                </ol>
+            </article>
+
+            <article class="result-card careers" data-reveal style="--reveal-delay: 290ms;">
+                <h3>Best Career Options</h3>
+                <div class="career-list">
+                    {% for career in result.get("career_options", []) %}
+                        <div class="career-option">
+                            <strong>{{ career.get("title", "") }}</strong>
+                            <p>{{ career.get("match_reason", "") }}</p>
+                            {% if career.get("skills_to_build") %}
+                                <small>Next focus: {{ career.get("skills_to_build") }}</small>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <p class="empty">No career options identified.</p>
+                    {% endfor %}
+                </div>
+            </article>
+
+            <article class="result-card resume-draft" data-reveal style="--reveal-delay: 340ms;">
+                <h3>{{ "Resume PDF Draft" if result.get("analysis_notice") else "Optimized Resume Draft" }}</h3>
+                <p class="draft-copy">
+                    {% if result.get("analysis_notice") %}
+                    Your submitted resume is ready to download while AI rewriting is unavailable.
+                    {% else %}
+                    Your downloadable draft is tailored to the role while preserving your original facts.
+                    {% endif %}
+                </p>
+                <details>
+                    <summary>Preview generated resume</summary>
+                    <pre>{{ result.get("improved_resume", "") }}</pre>
+                </details>
+                {% if report_id %}
+                <a class="download-button compact" href="{{ url_for('download_report', report_id=report_id) }}" download>
+                    Download PDF
+                </a>
+                {% endif %}
+            </article>
+        </div>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    <div class="analysis-loader" id="analysis-loader" role="status" aria-live="polite" aria-hidden="true">
+        <span class="loader-chip"><i></i> AI processing</span>
+        <div class="scanner">
+            <span class="scanner-orbit"></span>
+            <span class="scanner-orbit delay"></span>
+            <div class="scanner-page">
+                <i></i><i></i><i></i>
+                <b></b>
+            </div>
+        </div>
+        <h2 id="loader-status">Analyzing Resume...</h2>
+        <p>Securely turning your experience into actionable career intelligence.</p>
+        <div class="loader-steps"><span></span><span></span><span></span></div>
+    </div>
+</div>
+
+<script>
+document.getElementById("analyzer-form").addEventListener("submit", function () {
+    document.querySelector(".dashboard-shell").classList.add("is-analyzing");
+    document.getElementById("analysis-loader").setAttribute("aria-hidden", "false");
+    this.querySelector("button").disabled = true;
+    const phases = [
+        "Analyzing Resume...",
+        "Checking ATS Compatibility...",
+        "Generating Career Roadmap..."
+    ];
+    const status = document.getElementById("loader-status");
+    let phase = 0;
+    window.setInterval(function () {
+        phase = (phase + 1) % phases.length;
+        status.classList.add("is-switching");
+        window.setTimeout(function () {
+            status.textContent = phases[phase];
+            status.classList.remove("is-switching");
+        }, 180);
+    }, 1250);
+});
+</script>
+{% endblock %}
